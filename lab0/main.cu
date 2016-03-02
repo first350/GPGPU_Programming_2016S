@@ -13,7 +13,11 @@
 __global__ void SomeTransform(char *input_gpu, int fsize) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < fsize and input_gpu[idx] != '\n') {
-		input_gpu[idx] = 'T';
+		if( input_gpu[idx] >= 97) {
+			input_gpu[idx] -= 32;
+		} else {
+			input_gpu[idx] += 32;
+		}
 	
 	}
 }
@@ -43,12 +47,11 @@ int main(int argc, char **argv)
 	text_smem.get_cpu_wo()[fsize] = '\0';
 	fclose(fp);
 
-	// TODO: do your transform here
 	char *input_gpu = text_smem.get_gpu_rw();
-	// An example: transform the first 64 characters to '!'
+	// chage first 5*32 character , swap lowercase and uppercase, change space to @
 	// Don't transform over the tail
 	// And don't transform the line breaks
-	SomeTransform<<<3, 32>>>(input_gpu, fsize);
+	SomeTransform<<<5, 32>>>(input_gpu, fsize);
 
 	puts(text_smem.get_cpu_ro());
 	return 0;
