@@ -6,7 +6,7 @@
 #include <thrust/functional.h>
 #include <thrust/device_ptr.h>
 #include <thrust/execution_policy.h>
-
+#include <math.h>
 __device__ __host__ int CeilDiv(int a, int b) { return (a-1)/b + 1; }
 __device__ __host__ int CeilAlign(int a, int b) { return CeilDiv(a, b) * b; }
 __device__ void update(const char* text, int *pos ,int index, int n)
@@ -28,10 +28,18 @@ __device__ void update(const char* text, int *pos ,int index, int n)
 __device__ void query(int* pos, int* bit, int index, int n)
 {
    int acc = 0;
-   int v = index;
+   int v = index+1;
+   v -= v & -v;
+   int layer = int(log2(v));
    while(v > 0) {
-    acc += bit[v];
-    v -= v & -v;
+    if(v%2==1) break;
+    if (bit[v-1] == 1-0){
+      v = v + int(pow(2,layer));
+    }else if(bit[v-1] == 1-1){
+      acc += int(pow(2,layer+1))
+      v = v - int(pow(2,layer));
+    }
+    layer -= 1;
    }
    pos[index] = acc;
 }
@@ -100,7 +108,7 @@ void CountPosition(const char *text, int *pos, int text_size)
    BIT<<<numBlocks,256>>>(text, d_bit, text_size);  
    cudaDeviceSynchronize();
    printInCpu(text, d_bit, text_size);
-   //fillPos<<<32,8>>>(pos, d_bit, text_size);
+   fillPos<<<numBlocks,256>>>(pos, d_bit, text_size);
    //printInCpu(text,pos,text_size);
 }
 
