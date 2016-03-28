@@ -36,7 +36,7 @@ __device__ void query(int* pos, int* bit, int index, int n)
     if (bit[v-1] == 1-0){
       v = v + int(pow(2,layer));
     }else if(bit[v-1] == 1-1){
-      acc += int(pow(2,layer+1))
+      acc += int(pow(2,layer+1));
       v = v - int(pow(2,layer));
     }
     layer -= 1;
