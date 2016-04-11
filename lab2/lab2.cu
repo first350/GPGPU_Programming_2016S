@@ -8,7 +8,7 @@ static const unsigned NFRAME = 240;
 //extern void dens_step ( int N, float * x, float * x0, float * u, float * v, float diff, float dt );
 //extern void vel_step ( int N, float * u, float * v, float * u0, float * v0, float visc, float dt );
 /* global variables */
-static int N = 64;
+static int N = 128;
 static float dt=0.1f, diff=0.0f, visc=0.0f;
 static float force=5.0f, source=1500.0f;
 static int dvel;
@@ -65,11 +65,14 @@ void animate_parameter(float * d, float * u, float * v,int xx,int yy, int forcex
 void animate(int t) {
 	if (t >= 1 && t<=2){
 		animate_parameter ( dens_prev, u_prev, v_prev, 100,100,50,50 );
-	} else if (t == 50) {
-		animate_parameter ( dens_prev, u_prev, v_prev, 230,250,-10,10 );
-
-	} else if (t >= 100 && t<= 120){
-		animate_parameter ( dens_prev, u_prev, v_prev, 200,400,30,-10-(t-90) );
+	} else if (t >=3  && t<=5) {
+		animate_parameter ( dens_prev, u_prev, v_prev, 400,100,-50,-50 );
+	} else if (t >= 20 && t < 80) {
+		animate_parameter ( dens_prev, u_prev, v_prev, 120,250,30,-20-(t-30) );
+	} else if (t >= 120 && t < 150) {
+		animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
+	}else if (t >= 180 && t<= 190){
+		animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
 	}
 	else {
 		animate_parameter ( dens_prev, u_prev, v_prev, 0,0,10,10 );
@@ -120,6 +123,28 @@ void drawPoint(uint8_t *yuv, int x, int y,float color) {
 		cudaMemset(yuv + pos, int(RGBcolor), 2);
 	}
 }
+__global__ void drawDensityCuda(uint8_t *yuv, float* dens, int W, int H){
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.y;
+	int N = 128;
+	if (i > N || j > N) return;
+	float x, y, h, d00, d01, d10, d11;
+	h = 1.0f/N;
+	x = (i-0.5f)*h;
+	y = (j-0.5f)*h;
+	d00 = dens[IX(i,j)];
+	//drawPointCuda(yuv, int(x*W), H-int(y*H), d00);
+	float RGBcolor = d00*25500 > 255 ? 255: d00*25500;
+	int yy = H-int(y*H);
+	for(int ii = yy; ii < yy + 2; ii++) {
+		int pos = int(x*W)+ii*W;
+		yuv[pos] = int(RGBcolor);
+		yuv[pos+1] = int(RGBcolor);
+
+		//cudaMemset(yuv + pos, int(RGBcolor), 2);
+	}
+
+}
 void drawDensity(uint8_t *yuv) {
 	int i, j;
 	float x, y, h, d00, d01, d10, d11;
@@ -130,13 +155,13 @@ void drawDensity(uint8_t *yuv) {
 			y = (j-0.5f)*h;
 
 			d00 = dens[IX(i,j)];
-			d01 = dens[IX(i,j+1)];
-			d10 = dens[IX(i+1,j)];
-			d11 = dens[IX(i+1,j+1)];
+			//d01 = dens[IX(i,j+1)];
+			//d10 = dens[IX(i+1,j)];
+			//d11 = dens[IX(i+1,j+1)];
 			drawPoint(yuv, int(x*W), H-int(y*H), d00);
-			drawPoint(yuv, int((x+h)*W), H-int(y*H), d10);
-			drawPoint(yuv, int((x+h)*W), H-int((y+h)*H), d11);
-			drawPoint(yuv, int(x*W), H-int((y+h)*H), d01);
+			//drawPoint(yuv, int((x+h)*W), H-int(y*H), d10);
+			//drawPoint(yuv, int((x+h)*W), H-int((y+h)*H), d11);
+			//drawPoint(yuv, int(x*W), H-int((y+h)*H), d01);
 
 
 		}
@@ -144,45 +169,52 @@ void drawDensity(uint8_t *yuv) {
 }
 void changeDens(){
 	int i,j;
-	int index = 50;
-	for(i=20;i<52;i++){
+	int index = 30;
+	for(i=10;i<42;i++){
 		dens[IX(index,i)] = 0.0f;
 	}
 	index = 20;
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,10)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,25)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,40)] = 0.0f;
 	}
 
 }
 void changeDens2(){
 	int i,j;
-	int index = 50;
-	for(i=10;i<32;i++){
+	int index = 30;
+	for(i=24;i<42;i++){
 		dens[IX(index,i)] = 0.0f;
 	}
 	index = 20;
-	for(i=32;i<52;i++){
+	for(i=10;i<24;i++){
 		dens[IX(index,i)] = 0.0f;
 	}
-	index = 20;
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,10)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,25)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,40)] = 0.0f;
 	}
 
 }
+void changeDens1(){
+	int i,j;
+	int index = 30;
+	for(i=10;i<42;i++){
+		dens[IX(index,i)] = 0.0f;
+	}
+}
 void Lab2VideoGenerator::Generate(uint8_t *yuv) {
+	int size = (N+2)*(N+2);
 	if (impl->t == 0) {
 		cudaMemset(yuv,0,W*H);
 		init();
@@ -192,11 +224,21 @@ void Lab2VideoGenerator::Generate(uint8_t *yuv) {
 		}
 		printf("===========================\n");*/
 	printf("%d\n",impl->t);
-	/*
-	if(impl->t >= 100){
+
+	if(impl->t < 120){
+		changeDens();
+	} else if (impl->t < 180) {
 		changeDens2();
-	}*/
-	drawDensity(yuv);
+	} else if (impl->t < 260){
+		changeDens1();
+	}
+	//drawDensity(yuv);
+	float *d_dens;
+	cudaMalloc(&d_dens, size*sizeof(float));
+	cudaMemcpy(d_dens, dens, size*sizeof(float), cudaMemcpyHostToDevice);
+	dim3 block(16,16);
+	dim3 grid (  N/16,  N/16  );
+	drawDensityCuda<<<grid,block>>>(yuv,d_dens,W,H);
 	animate(impl->t);
 	//}
 	cudaMemset(yuv+W*H, 128, W*H/2);
