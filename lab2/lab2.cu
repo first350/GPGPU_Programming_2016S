@@ -3,23 +3,23 @@ static const unsigned W = 640;
 static const unsigned H = 480;
 static const unsigned NFRAME = 240;
 #define IX(i,j) ((i)+(N+2)*(j))
+/*
+This stable fluid solver is provided by Jos Stam
+In this lab I use the following twp function
+vel_step ( N, u, v, u_prev, v_prev, visc, dt );
+dens_step ( N, dens, dens_prev, u, v, diff, dt );
+I read the code and modify the display function
+"drawDensityCuda", draw the density in dens array
+with GPU acceleration.
+
+Reference: Stam, Jos. "Real-time fluid dynamics for games." Proceedings of the game developer conference. Vol. 18. 2003.
+*/
 #include "solver.c"
-/* external definitions (from solver.c) */
-//extern void dens_step ( int N, float * x, float * x0, float * u, float * v, float diff, float dt );
-//extern void vel_step ( int N, float * u, float * v, float * u0, float * v0, float visc, float dt );
-/* global variables */
 static int N = 128;
 static float dt=0.1f, diff=0.0f, visc=0.0f;
 static float force=5.0f, source=1500.0f;
-static int dvel;
-
 static float * u, * v, * u_prev, * v_prev;
 static float * dens, * dens_prev;
-
-static int win_id;
-static int win_x, win_y;
-static int mouse_down[3];
-static int omx, omy, mx, my;
 int convert(int r,int c) {
 	return c * W + r;
 }
@@ -70,9 +70,9 @@ void animate(int t) {
 	} else if (t >= 20 && t < 80) {
 		animate_parameter ( dens_prev, u_prev, v_prev, 120,250,30,-20-(t-30) );
 	} else if (t >= 120 && t < 150) {
-		animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
+		//animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
 	}else if (t >= 180 && t<= 190){
-		animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
+		//animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
 	}
 	else {
 		animate_parameter ( dens_prev, u_prev, v_prev, 0,0,10,10 );
