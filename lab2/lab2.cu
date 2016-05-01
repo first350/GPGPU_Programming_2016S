@@ -65,11 +65,12 @@ void animate_parameter(float * d, float * u, float * v,int xx,int yy, int forcex
 void animate(int t) {
 	if (t >= 1 && t<=2){
 		animate_parameter ( dens_prev, u_prev, v_prev, 100,100,50,50 );
-	} else if (t == 50) {
-		animate_parameter ( dens_prev, u_prev, v_prev, 230,250,-10,10 );
-
-	} else if (t >= 100 && t<= 120){
-		animate_parameter ( dens_prev, u_prev, v_prev, 200,400,30,-10-(t-90) );
+	} else if (t >= 20 && t < 80) {
+		animate_parameter ( dens_prev, u_prev, v_prev, 220,250,30,-20-(t-30) );
+	} else if (t >= 120 && t < 150) {
+		animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
+	}else if (t >= 180 && t<= 190){
+		animate_parameter ( dens_prev, u_prev, v_prev, 220,230,30,-20-(t-30) );
 	}
 	else {
 		animate_parameter ( dens_prev, u_prev, v_prev, 0,0,10,10 );
@@ -144,43 +145,49 @@ void drawDensity(uint8_t *yuv) {
 }
 void changeDens(){
 	int i,j;
-	int index = 50;
-	for(i=20;i<52;i++){
+	int index = 30;
+	for(i=10;i<42;i++){
 		dens[IX(index,i)] = 0.0f;
 	}
 	index = 20;
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,10)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,25)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,40)] = 0.0f;
 	}
 
 }
 void changeDens2(){
 	int i,j;
-	int index = 50;
-	for(i=10;i<32;i++){
+	int index = 30;
+	for(i=24;i<42;i++){
 		dens[IX(index,i)] = 0.0f;
 	}
 	index = 20;
-	for(i=32;i<52;i++){
+	for(i=10;i<24;i++){
 		dens[IX(index,i)] = 0.0f;
 	}
-	index = 20;
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,10)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,25)] = 0.0f;
 	}
-	for(i=index;i<50;i++){
+	for(i=index;i<30;i++){
 		dens[IX(i,40)] = 0.0f;
 	}
 
+}
+void changeDens1(){
+	int i,j;
+	int index = 30;
+	for(i=10;i<42;i++){
+		dens[IX(index,i)] = 0.0f;
+	}
 }
 void Lab2VideoGenerator::Generate(uint8_t *yuv) {
 	if (impl->t == 0) {
@@ -192,10 +199,14 @@ void Lab2VideoGenerator::Generate(uint8_t *yuv) {
 		}
 		printf("===========================\n");*/
 	printf("%d\n",impl->t);
-	/*
-	if(impl->t >= 100){
+
+	if(impl->t < 120){
+		changeDens();
+	} else if (impl->t < 180) {
 		changeDens2();
-	}*/
+	} else {
+		changeDens1();
+	}
 	drawDensity(yuv);
 	animate(impl->t);
 	//}
